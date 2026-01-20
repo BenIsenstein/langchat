@@ -2,4 +2,7 @@ FROM node:20
 
 WORKDIR /app
 
-ENTRYPOINT npm i && npm run dev
+COPY package.json package-lock.json ./
+RUN npm install
+
+CMD ["npm", "run", "dev"]
