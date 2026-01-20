@@ -72,9 +72,9 @@ async def chat(chat_id: str, stream_id: str):
     async def event_generator():
         langgraph_step = None
         message_id = None
-
-        async for event in stream:
-            try:
+        
+        try:
+            async for event in stream:
                 event_type, data = event
 
                 if event_type == "messages":
@@ -116,12 +116,12 @@ async def chat(chat_id: str, stream_id: str):
                 #         print("There was an 'updates' event that wasn't 'model' or 'tools'. See here --> ", data)
 
                 yield f"data: {json.dumps(payload)}\n\n"
-            except Exception as e:
-                error_payload = {
-                    "type": "error",
-                    "data": str(e)
-                }
-                yield f"data: {json.dumps(error_payload)}\n\n"
+        except Exception as e:
+            error_payload = {
+                "type": "error",
+                "data": str(e)
+            }
+            yield f"data: {json.dumps(error_payload)}\n\n"
 
         yield "event: closedConnection\ndata: Stream finished\n\n"
         del streams[stream_id]
