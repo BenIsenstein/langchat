@@ -63,7 +63,7 @@ async def chat(chat_id: str, stream_id: str):
     stream = agent.astream(
         {"messages": [{"role": "user", "content": payload.get("message", "")}]},
         config={"configurable": {"thread_id": payload.get("chat_id", "")}},
-        stream_mode=["messages", "updates"]
+        stream_mode=["messages", "updates", "custom"]
     )
 
     # Since each node invocation in the agent graph doesn't have a unique id, just incrementing numbers,
@@ -75,9 +75,9 @@ async def chat(chat_id: str, stream_id: str):
 
         async for event in stream:
             try:
-                type, data = event
+                event_type, data = event
 
-                if type == "messages":
+                if event_type == "messages":
                     message_chunk, metadata = data
 
                     if len(message_chunk.content_blocks) == 0:
@@ -101,6 +101,11 @@ async def chat(chat_id: str, stream_id: str):
                         payload["data"] = block["text"]
                     elif block["type"] == "tool_call_chunk":
                         payload["data"] = block["args"]
+
+                elif event_type == "custom":
+                    print("Custom event received with type: ", type(data))
+                    print(data) # stdout OutputMessages() and Results() are streaming through here
+                    continue
 
                 # elif type == "updates":
                 #     if "model" in data:

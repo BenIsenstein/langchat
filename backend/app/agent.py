@@ -12,6 +12,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.config import get_stream_writer
 from e2b_code_interpreter import Sandbox
 
 model = init_chat_model(
@@ -35,10 +36,16 @@ If a user asks you to run some code, write and execute a script, compute a value
 def code_sandbox(code: str, lang: str = "python") -> str:
     """Execute code in a sandboxed compute environment."""
     
-    # check E2B example
+    writer = get_stream_writer()
     sbx = Sandbox.create() # By default the sandbox is alive for 5 minutes
-    execution = sbx.run_code(code, lang) # Execute Python inside the sandbox
-    # print(execution.logs)
+    execution = sbx.run_code(
+        code,
+        lang,
+        on_error=lambda error: writer(error),
+        on_stdout=lambda data: writer(data),
+        on_stderr=lambda data: writer(data),
+        on_result=lambda result: writer(result)
+    )
 
     return execution.text
 
