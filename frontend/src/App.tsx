@@ -99,8 +99,8 @@ function App() {
         // opting to not close the event source or set loading to false every time.
         // more useful tokens may still come in,
         // and the "closedConnection" event from the backend will end the stream eventually.
-        
-        if ((err as MessageEvent).data.includes("stream not found")) {
+
+        if (err instanceof MessageEvent && err.data.includes("stream not found")) {
           eventSource.close()
           setIsLoading(false)
         }
