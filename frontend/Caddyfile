@@ -10,10 +10,16 @@
 }
 
 :80 {
-	log {
-		format console
+    respond /health 200
+
+    basic_auth {
+		user $2a$14$rsiqNduPLsAVYzrHw3dpe.lNFbeIs9iTOJoFLKy7iVAoqLKRaWYPm
 	}
-	
+
+    log {
+        format console
+    }
+
 	encode zstd gzip
 
 	handle_path /api/* {
@@ -25,6 +31,4 @@
 		try_files {path} /index.html
 		file_server
 	}
-	
-	respond /health 200
 }

@@ -11,7 +11,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM caddy:2.7.4-alpine
+FROM caddy:2.8.0-alpine
 
 COPY --from=builder /app/dist /usr/share/caddy
 
