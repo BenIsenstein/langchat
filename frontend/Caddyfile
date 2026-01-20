@@ -1,0 +1,30 @@
+{
+	auto_https off
+	admin off
+	log {
+		format console
+	}
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	log {
+		format console
+	}
+	
+	encode zstd gzip
+
+	handle_path /api/* {
+		reverse_proxy {$BACKEND_HOST}:{$BACKEND_PORT}
+	}
+	
+	handle {
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+	
+	respond /health 200
+}

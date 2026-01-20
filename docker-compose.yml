@@ -1,0 +1,48 @@
+name: langchat
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      # dockerfile: Dockerfile     # prod
+      dockerfile: dev.Dockerfile   # dev
+      # args:                      # prod
+      #   VITE_BACKEND_URL: /api   # prod
+    restart: unless-stopped
+    ports:
+      - 5173:5173 # dev
+      - 8080:80   # prod
+
+    volumes:            # dev
+      - ./frontend:/app # dev
+
+    environment:
+      VITE_BACKEND_URL: http://localhost:${BACKEND_PORT} # dev
+      # BACKEND_HOST: backend         # prod
+      # BACKEND_PORT: ${BACKEND_PORT} # prod
+
+    depends_on:
+      backend:
+        condition: service_started
+
+  backend:
+    build:
+      context: ./backend
+      # dockerfile: Dockerfile   # prod
+      dockerfile: dev.Dockerfile # dev
+    restart: unless-stopped
+    ports:
+      - $BACKEND_PORT:$BACKEND_PORT
+
+    volumes:                   # dev
+      - ./backend/app:/app/app # dev
+      
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${BACKEND_PORT}/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      E2B_API_KEY: ${E2B_API_KEY}
+      PORT: ${BACKEND_PORT}
